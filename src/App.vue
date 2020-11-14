@@ -4,65 +4,55 @@
       <div class="hero-head">
         <nav class="navbar">
           <div class="container">
-            <div>
-              <a href="/">
-                <p class="title">Chess Guardian (beta)</p>
-                <p class="subtitle">Answer Chess technical questions from your own positions to improve board vision.</p>
-              </a>
-              <p class="subtitle">Inspired by this article <a href="https://www.chess.com/blog/danheisman/the-amazing-power-of-board-vision">The Amazing Power of Board Vision</a> by Dan Heisman</p>
+            <div class="has-centered-text">
+              <div>
+                <a href="/">
+                  <p class="title">Chess Tactics Trainer</p>
+                  <p class="subtitle">Solve Chess Tactics from books.</p>
+                </a>
+              </div>
 
             </div>
             <div id="navbarMenu" class="navbar-menu">
               <div class="navbar-end"></div>
             </div>
           </div>
+          <div class="has-text-right">
+            Made by <a href="http://github.com/simiaosimis">@simiaosimis</a> with <a href="https://vuejs.org/">Vue.js</a>
+          </div>
         </nav>
       </div>
       <div class="hero-body">
         <div class="container has-text-centered">
-          <div class="columns">
-            <div class="column is-5">
-              <chessboard :fen="currentPosition.fen" :showThreats="showThreats" @onMove="showInfo"></chessboard>
-              <div class="has-centered-text">
-                {{currentPosition.white}} VS {{currentPosition.black}} <br><a :href="currentPosition.url">View game in chess.com</a>
-              </div>
-            </div>
-            <div class="column is-7">
-              <QuestionGame></QuestionGame>
-            </div>
-          </div>
+            <virtual-list style="height: 80%; overflow-y: auto; width: auto"
+            :data-key="'uid'"
+            :data-sources="this.positions"
+            :data-component="tacticsPuzzle"
+            />
         </div>
       </div>
 
-      <div class="hero-foot">
-        <div class="container">
-          <div class="has-text-centered">
-            Made by <a href="http://vitomd.com">@vitomd</a> with <a href="https://vuejs.org/">Vue.js</a> | Check all my <a href="http://vitomd.com/blog/projects/">chess related projects</a>
-          </div>
-        </div>
-      </div>
     </section>
-    <a href="https://github.com/vitogit/vue-chess-guardian"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>              </div>
   </div>
 
 </template>
 
 <script>
-import jQuery from 'jquery'
-import Chess from 'chess.js'
-import {chessboard} from 'vue-chessboard'
-import 'vue-chessboard/dist/vue-chessboard.css'
+import pgnParser from 'pgn-parser'
 import { shuffle } from './Util.js'
 import {defaultPositions} from './PositionData.js'
 import QuestionGame from './components/QuestionGame'
 import StartModal from './components/StartModal'
+import TacticsPuzzle from "./components/TacticsPuzzle";
+import VirtualList from 'vue-virtual-scroll-list'
 
 export default {
   name: 'App',
   components: {
-    chessboard,
     QuestionGame,
-    StartModal
+    StartModal,
+    TacticsPuzzle,
+    'virtual-list': VirtualList
   },
   data () {
     return {
@@ -72,6 +62,8 @@ export default {
       started: false,
       isStartModalActive: true,
       positionInfo: {},
+      tacticsPuzzle: TacticsPuzzle,
+      positions: [],
     }
   },
   methods: {
@@ -82,65 +74,34 @@ export default {
     },
     start(data){ //TODO improve this method
       let positions = []
-      if (data && data.username) {
-        this.positions = this.getPositions(data)
-      } else {
-        this.positions = defaultPositions()
-      }
-      if (this.positions.length < 10 ) {
-        this.promptAgain()
-      } else {
-        this.positionNumber = 0
-        this.positions = shuffle(this.positions)
-        this.nextQuestion()
-      }
+
+      const fileUrl = '/static/MaximBlokhCHESSCombinationalMotifs.pgn' // provide file location dynamically
+
+      fetch(fileUrl)
+        .then( r => r.text() )
+        .then( t => this.processData(t) )
     },
-    getPositions({username, year, month}){ //TODO refactor this big method and make it async
-
-      month = ("00" + month).slice(-2) // API expect month like 2 digits MM
-
-      username = username || 'hikaru'
-      username = username.replace(/\s/g, '').toLowerCase()
-
-      this.$toast.open(`Pulling positions from: ${username}`)
-      let games = []
-      jQuery.ajax({
-        method: 'GET',
-        url: `https://api.chess.com/pub/player/${username}/games/${year}/${month}`,
-        async: false,
-        success: function (data) {
-          games = data.games.slice(0,50) //get 50 games
-        },
-        error: function (error) {
-          console.log('Something wrong with ajax:', error);
-        }
-      });
-      let positions = []
-      let loadedGame = new Chess()
+    processData(data){
+      let games = pgnParser.parse(data);
+      let index = 1;
+      let fens = [];
+      let difficulties = [];
+      let whoIsToMove = [];
       games.forEach(game => {
-        loadedGame.load_pgn(game.pgn)
-        let middlegame = Math.round(loadedGame.history().length / 2)
-        if (loadedGame.history().length < 40) {
-          return // skip this and go to next game if is too short (40 halfmoves)
+        console.log(game);
+        fens.push(game.headers[9].value);
+        let dif = game.headers[0].value.substring(2);
+        difficulties.push(dif)
+        whoIsToMove.push(game.headers[4].value === "?" ? "Black" : "White");
+        if (index % 3 === 0){
+          this.positions.push({uid: index, fen: fens, difficulties: difficulties, whoIsToMove: whoIsToMove});
+          console.log(whoIsToMove);
+          fens = [];
+          difficulties = [];
+          whoIsToMove = [];
         }
-        Array.from(Array(middlegame), () => loadedGame.undo()) //go back to middlegame
-        let p = {fen: loadedGame.fen(), white: game.white.username, black: game.black.username, url: game.url}
-        positions.push(p)
-      })
-      return positions
-    },
-    promptAgain() {
-      this.genericPrompt({
-        title: 'ERROR',
-        message: `There are not enough games (${this.positions.length}) from the selected user and month. You need at least 10. Select another chess.com user or month.`,
-        type:'is-danger'
-      })
-    },
-    prompt() {
-      this.genericPrompt({
-        title: `What's your chess.com username?`,
-        message: 'It will pull random positions from the games played in the selected month for the selected user '
-      })
+        index++;
+      });
     },
     genericPrompt({title, message, type}) {
       this.$modal.open({
@@ -160,13 +121,24 @@ export default {
         }
       })
     },
-    showInfo(info){
-      this.positionInfo = info
-      this.$eventHub.$emit('game-changed', {color:this.positionInfo.turn, threats: this.positionInfo})
+    dispatch (componentName, eventName, ...rest) {
+      let parent = this.$parent || this.$root
+      let name = parent.$options.name
+
+      while (parent && (!name || name !== componentName)) {
+        parent = parent.$parent
+        if (parent) {
+          name = parent.$options.name
+        }
+      }
+
+      if (parent) {
+        parent.$emit.apply(parent, [eventName].concat(rest))
+      }
     }
   },
   mounted(){
-    this.prompt()
+    this.start()
   },
   created() {
     this.positions = []

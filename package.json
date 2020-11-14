@@ -1,11 +1,12 @@
 {
-  "name": "vue-chess-guardian",
+  "name": "vue-chess-tactics",
   "version": "1.0.0",
   "description": "Chess training exercices in Vue.js",
-  "author": "vitogit <vitogit@users.noreply.github.com>",
+  "author": "simiaosimis <simiaosimis@gmail.com>",
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "deploy": "node scripts/gh-pages-deploy.js",
     "start": "npm run dev",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "test": "npm run unit",
@@ -15,8 +16,10 @@
   "dependencies": {
     "buefy": "^0.6.2",
     "jquery": "^3.2.1",
+    "pgn-parser": "^2.0.0",
     "vue": "^2.5.2",
-    "vue-chessboard": "^0.6.1"
+    "vue-chessboard": "^0.6.1",
+    "vue-virtual-scroll-list": "^2.3.1"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
@@ -34,6 +37,7 @@
     "copy-webpack-plugin": "^4.0.1",
     "cross-env": "^5.0.1",
     "css-loader": "^0.28.0",
+    "execa": "latest",
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^1.1.4",
     "friendly-errors-webpack-plugin": "^1.6.1",
@@ -67,7 +71,7 @@
     "vue-loader": "^13.3.0",
     "vue-style-loader": "^3.0.1",
     "vue-template-compiler": "^2.5.2",
-    "webpack": "^3.6.0",
+    "webpack": "^3.12.0",
     "webpack-bundle-analyzer": "^2.9.0",
     "webpack-dev-server": "^2.9.1",
     "webpack-merge": "^4.1.0"
