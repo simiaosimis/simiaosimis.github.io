@@ -24,10 +24,14 @@
       </div>
       <div class="hero-body">
         <div class="container has-text-centered">
-            <virtual-list style="height: 80%; overflow-y: auto; width: auto"
+            <virtual-list style="height: auto; width: auto"
             :data-key="'uid'"
             :data-sources="this.positions"
             :data-component="tacticsPuzzle"
+            :keeps="10"
+            :estimate-size="250"
+            :page-mode="true"
+            :bottom-threshold="500"
             />
         </div>
       </div>
@@ -67,11 +71,6 @@ export default {
     }
   },
   methods: {
-    nextQuestion() {
-      let position = this.positions[this.positionNumber]
-      this.currentPosition = position
-      this.positionNumber++
-    },
     start(data){ //TODO improve this method
       let positions = []
 
@@ -88,14 +87,12 @@ export default {
       let difficulties = [];
       let whoIsToMove = [];
       games.forEach(game => {
-        console.log(game);
         fens.push(game.headers[9].value);
         let dif = game.headers[0].value.substring(2);
         difficulties.push(dif)
         whoIsToMove.push(game.headers[4].value === "?" ? "Black" : "White");
         if (index % 3 === 0){
           this.positions.push({uid: index, fen: fens, difficulties: difficulties, whoIsToMove: whoIsToMove});
-          console.log(whoIsToMove);
           fens = [];
           difficulties = [];
           whoIsToMove = [];
