@@ -1,39 +1,39 @@
 <template>
-  <div class="columns">
-    <div class="column is-4">
-      <h3>Problem {{source.uid - 2}}</h3>
+  <div class="columns is-centered is-multiline is-variable">
+    <div class="column is-one-third has-background-light">
+      <h3><strong>Problem {{source.uid - 2}}</strong></h3>
       {{source.whoIsToMove[0]}} To Move
       <chessboard :fen="this.positions1[this.positionNumber1]" :orientation="orientation" :showThreats="showThreats" @onMove="showInfo1"></chessboard>
       <div class="has-centered-text">
         <span v-if="source.whoIsToMove[0] === 'White'">You</span><span v-else>Level {{source.difficulties[0]}}</span> VS <span v-if="source.whoIsToMove[0] === 'Black'">You</span><span v-else>Level {{source.difficulties[0]}}</span> <br>
       </div>
-      <button class="button is-light" @click="restartFen1"><<</button>
-      <button class="button is-light" @click="previousFen1"><</button>
-      <button class="button is-light" @click="nextFen1">></button>
+      <button class="button is-link-light" @click="restartFen1"><<</button>
+      <button class="button is-link-light" @click="previousFen1"><</button>
+      <button class="button is-link-light" @click="nextFen1">></button>
     </div>
-    <div class="column is-4">
-      <h3>Problem {{source.uid - 1}}</h3>
+    <div class="column is-one-third has-background-light">
+      <h3><strong>Problem {{source.uid - 1}}</strong></h3>
       {{source.whoIsToMove[1]}} To Move
       <chessboard :fen="this.positions2[this.positionNumber2]" :showThreats="showThreats" @onMove="showInfo2"></chessboard>
       <div class="has-centered-text">
         <span v-if="source.whoIsToMove[1] === 'White'">You</span><span v-else>Level {{source.difficulties[1]}}</span> VS <span v-if="source.whoIsToMove[1] === 'Black'">You</span><span v-else>Level {{source.difficulties[1]}}</span> <br>
       </div>
-      <button class="button is-light" @click="restartFen2"><<</button>
-      <button class="button is-light" @click="previousFen2"><</button>
-      <button class="button is-light" @click="nextFen2">></button>
+      <button class="button is-link-light" @click="restartFen2"><<</button>
+      <button class="button is-link-light" @click="previousFen2"><</button>
+      <button class="button is-link-light" @click="nextFen2">></button>
     </div>
-    <div class="column is-4">
-      <h3>Problem {{source.uid}}</h3>
+    <div class="column is-one-third has-background-light">
+      <h3><strong>Problem {{source.uid}}</strong></h3>
       {{source.whoIsToMove[2]}} To Move
       <chessboard :fen="this.positions3[this.positionNumber3]" :showThreats="showThreats" @onMove="showInfo3"></chessboard>
       <div class="has-centered-text">
         <span v-if="source.whoIsToMove[2] === 'White'">You</span><span v-else>Level {{source.difficulties[2]}}</span> VS <span v-if="source.whoIsToMove[2] === 'Black'">You</span><span v-else>Level {{source.difficulties[2]}}</span> <br>
       </div>
-      <button class="button is-light" @click="restartFen3"><<</button>
-      <button class="button is-light" @click="previousFen3"><</button>
-      <button class="button is-light" @click="nextFen3">></button>
+      <button class="button is-link-light" @click="restartFen3"><<</button>
+      <button class="button is-link-light" @click="previousFen3"><</button>
+      <button class="button is-link-light" @click="nextFen3">></button>
     </div>
-
+    <hr>
     <br>
   </div>
 </template>
